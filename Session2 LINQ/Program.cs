@@ -1,10 +1,319 @@
-﻿namespace Session2_LINQ
+﻿using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.Intrinsics.X86;
+using System.Threading;
+using System.Diagnostics.Metrics;
+using System.Xml;
+using System.ComponentModel;
+using System.Data.SqlTypes;
+using System.Collections;
+using static System.Net.Mime.MediaTypeNames;
+using System.Collections.Concurrent;
+using System.Text.RegularExpressions;
+
+namespace Session2_LINQ
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            #region LINQ - Element Operators
+            //1. Get first Product out of Stock 
+            var rese01 = ListGenerator.ProductList.First(p => p.UnitsInStock == 0);
+            Console.WriteLine(rese01);
+            Console.WriteLine("//////");
+
+            //2. Return the first product whose Price > 1000, unless there is no match, in which case null is returned.
+            var rese02 = ListGenerator.ProductList.FirstOrDefault(p => p.UnitPrice > 1000, null);
+            Console.WriteLine(rese02);
+            Console.WriteLine("//////");
+
+            //3. Retrieve the second number greater than 5 
+            int[] ArrE = { 5, 4, 1, 3, 9, 8, 6, 7, 2, 0 };
+            var rese03 = ArrE.Where(p => p > 5).Skip(count: 1).First();
+            Console.WriteLine(rese03);
+            Console.WriteLine("//////");
+            #endregion
+
+            #region LINQ - Aggregate Operators
+            //1. Uses Count to get the number of odd numbers in the array
+            int[] ArrA = { 5, 4, 1, 3, 9, 8, 6, 7, 2, 0 };
+            var resa01 = ArrA.Count(a => a % 2 != 0);
+            Console.WriteLine(resa01);
+            Console.WriteLine("//////");
+
+            //var resa02 = ListGenerator.CustomerList.Count(c => c.Orders != null);
+            var resa02 = from c in ListGenerator.CustomerList
+                         select c.Orders.Count(c => c != null);
+            foreach(var item in resa02)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //3. Return a list of categories and how many products each has
+            var resa03 = ListGenerator.ProductList.GroupBy(p => p.Category).Select(p => new { cat = p.Key, count = p.Count() });
+            foreach(var item in resa03)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //4. Get the total of the numbers in an array.
+            int[] ArrA02 = { 5, 4, 1, 3, 9, 8, 6, 7, 2, 0 };
+            var resa04 = ArrA02.Sum();
+            Console.WriteLine(resa04);
+            Console.WriteLine("//////");
+
+            //5.Get the total number of characters of all words in dictionary_english.txt(Read dictionary_english.txt into Array of String First).
+            string[] stra = File.ReadAllLines("E:\\Temp\\ASP.NET\\C#\\LINQ\\Session2 LINQ\\Session2 LINQ\\Session2 LINQ\\bin\\Debug\\net8.0\\dictionary_english.txt");
+            var resa05 = stra.Sum(w => w.Length);
+            Console.WriteLine(resa05);
+            Console.WriteLine("//////");
+
+            //6.Get the length of the shortest word in dictionary_english.txt(Read dictionary_english.txt into Array of String First).
+            //var resa06 = stra.OrderBy(w => w.Length).First();
+            var resa06 = stra.Min(w => w.Length);
+            Console.WriteLine(resa06);
+            Console.WriteLine("//////");
+
+            //7.Get the length of the longest word in dictionary_english.txt(Read dictionary_english.txt into Array of String First).
+            var resa07 = stra.Max(w => w.Length);
+            Console.WriteLine(resa07);
+            Console.WriteLine("//////");
+
+            //8.Get the average length of the words in dictionary_english.txt(Read dictionary_english.txt into Array of String First).
+            var resa08 = stra.Average(w => w.Length);
+            Console.WriteLine(resa08);
+            Console.WriteLine("//////");
+
+            //9. Get the total units in stock for each product category.
+            //var resa09 = ListGenerator.ProductList.GroupBy(p => p.Category).Select(p => p.Sum(p => p.UnitsInStock));
+            var resa09 = ListGenerator.ProductList.GroupBy(p => p.Category).Select(p => new { Catrgory = p.Key, InStock = p.Sum(p => p.UnitsInStock) });
+            foreach (var item in resa09)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //10.Get the cheapest price among each category's products
+            var resa10 = ListGenerator.ProductList.GroupBy(p => p.Category).Select(p => new { Catrgory = p.Key, Cheapest = p.Min(p => p.UnitPrice) });
+            foreach (var item in resa10)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //11.Get the products with the cheapest price in each category(Use Let)
+            var resa11 = from p in ListGenerator.ProductList
+                         group p by p.Category into pp
+                         let min = pp.Min(p => p.UnitPrice)
+                         from p in pp
+                         where p.UnitPrice == min
+                         select new { p.Category, p.UnitPrice };
+            foreach(var item in resa11)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //12. Get the most expensive price among each category's products.
+            var resa12 = ListGenerator.ProductList.GroupBy(p => p.Category).Select(p => new { Catrgory = p.Key, mostExpansive = p.Max(p => p.UnitPrice) });
+            foreach (var item in resa12)
+            {
+                Console.WriteLine(item);
+            }
+
+            Console.WriteLine("//////");
+            //14. Get the average price of each category's products.
+            var resa14 = ListGenerator.ProductList.GroupBy(p => p.Category).Select(p => new { Catrgory = p.Key, Average = p.Average(p => p.UnitPrice) });
+            foreach (var item in resa14)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+            #endregion
+
+            #region LINQ - Ordering Operators
+            //1. Sort a list of products by name
+            var reso01 = ListGenerator.ProductList.OrderBy(p => p.ProductName);
+            foreach(var item in reso01)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //2. Uses a custom comparer to do a case-insensitive sort of the words in an array.
+            string[] ArrO = { "aPPLE", "AbAcUs", "bRaNcH", "BlUeBeRrY", "ClOvEr", "cHeRry" };
+            var reso02 = ArrO.OrderBy(w => w, StringComparer.OrdinalIgnoreCase);
+            foreach(var item in reso02)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //3. Sort a list of products by units in stock from highest to lowest.
+            var reso03 = ListGenerator.ProductList.OrderByDescending(p => p.UnitsInStock);
+            foreach(var item in reso03)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //4. Sort a list of digits, first by length of their name, and then alphabetically by the name itself.
+            string[] ArrO02 = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
+            var reso04 = ArrO02.OrderBy(p => p.Length).ThenBy(p => p);
+            foreach(var item in reso04)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //5. Sort first by-word length and then by a case-insensitive sort of the words in an array.
+            var reso05 = ArrO.OrderBy(w => w.Length).ThenBy(w => w, StringComparer.OrdinalIgnoreCase);
+            foreach(var item in reso05)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //6. Sort a list of products, first by category, and then by unit price, from highest to lowest.
+            var reso06 = ListGenerator.ProductList.OrderBy(p => p.Category).ThenBy(p => p.UnitPrice);
+            foreach(var item in reso06)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //7.Sort first by-word length and then by a case -insensitive descending sort of the words in an array.
+            var reso07 = ArrO.OrderBy(w => w.Length).ThenByDescending(w => w, StringComparer.OrdinalIgnoreCase);
+            foreach(var item in reso07)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //8.Create a list of all digits in the array whose second letter is 'i' that is reversed from the order in the original array.
+            var reso08 = ArrO02.Where(a => a[1] == 'i').Order();
+            foreach(var item in reso08)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+            #endregion
+
+            #region LINQ - Set Operators
+            //1. Find the unique Category names from Product List
+            var ress01 = ListGenerator.ProductList.Select(p => p.Category).Distinct();
+            foreach (var item in ress01)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //2.Produce a Sequence containing the unique first letter from both product and customer names.
+            var ress021 = ListGenerator.ProductList.Select(p => p.ProductName[0]).Distinct();
+            var ress022 = ListGenerator.CustomerList.Select(p => p.CustomerName[0]).Distinct();
+            var ress02 = ress021.Union(ress022);
+            foreach(var item in ress02)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //3.Create one sequence that contains the common first letter from both product and customer names.
+            var ress031 = ListGenerator.ProductList.Select(p => p.ProductName[0]).Distinct();
+            var ress032 = ListGenerator.CustomerList.Select(p => p.CustomerName[0]).Distinct();
+            var ress03 = ress031.Intersect(ress032);
+            foreach (var item in ress03)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //4.Create one sequence that contains the first letters of product names that are not also first letters of customer names.
+            var ress041 = ListGenerator.ProductList.Select(p => p.ProductName[0]).Distinct();
+            var ress042 = ListGenerator.CustomerList.Select(p => p.CustomerName[0]).Distinct();
+            var ress04 = ress041.Except(ress042);
+            foreach (var item in ress04)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            #endregion
+
+            #region LINQ - Quantifiers
+            //1.Determine if any of the words in dictionary_english.txt(Read dictionary_english.txt into Array of String First) contain the substring 'ei'.
+            var resq01 = stra.Any(s => s.Contains("ei"));
+            Console.WriteLine(resq01);
+            Console.WriteLine("//////");
+
+            //2.Return a grouped a list of products only for categories that have at least one product that is out of stock.
+            var resq02 = ListGenerator.ProductList.Where(p => ListGenerator.ProductList.Any(pp => pp.Category == p.Category && pp.UnitsInStock == 0)).GroupBy(p => p.Category);
+
+            foreach (var item01 in resq02)
+            {
+                foreach (var item02 in item01)
+                {
+                    Console.WriteLine(item02);
+                }
+            }
+            Console.WriteLine("//////");
+
+            //3.Return a grouped a list of products only for categories that have all of their products in stock.
+            var resq03 = ListGenerator.ProductList.Where(p => ListGenerator.ProductList.All(pp => pp.Category == p.Category && pp.UnitsInStock > 0)).GroupBy(p => p.Category);
+
+            foreach (var item01 in resq03)
+            {
+                foreach (var item02 in item01)
+                {
+                    Console.WriteLine(item02);
+                }
+            }
+            //it will print null i guess
+            Console.WriteLine("//////");
+            #endregion
+
+            #region LINQ – Grouping Operators
+            //1.Use group by to partition a list of numbers by their remainder when divided by 5
+            List<int> numbers = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+            var resg01 = numbers.GroupBy(n => n % 5);
+            foreach(var item in resg01)
+            {
+                Console.WriteLine($"Numbers with a remainder of {item.Key} when divided by 5:");
+                foreach(var num in item)
+                {
+                    Console.WriteLine(num);
+                }
+            }
+            Console.WriteLine("//////");
+
+            //2.Uses group by to partition a list of words by their first letter. Use dictionary_english.txt for Input
+            //var resg02 = stra.GroupBy(s => s[0]);
+            //foreach(var item in resg02)
+            //{
+            //    Console.WriteLine(item.Key);
+            //    foreach(var chr in item)
+            //    {
+            //        Console.WriteLine(chr);
+            //    }
+            //}
+            //Console.WriteLine("//////");
+
+            //3.Use Group By with a custom comparer that matches words that are consists of the same Characters Together
+            string[] Arr = { "from", "salt", "earn", "last", "near", "form" };
+            var resg03 = Arr.GroupBy(s => new string(s.OrderBy(c => c).ToArray()));
+            foreach (var item in resg03)
+            {
+                foreach(var str in item)
+                {
+                    Console.WriteLine(str);
+                }
+                Console.WriteLine("....");
+            }
+            #endregion
         }
     }
 }
