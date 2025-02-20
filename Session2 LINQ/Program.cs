@@ -8,6 +8,9 @@ using System.Xml;
 using System.ComponentModel;
 using System.Data.SqlTypes;
 using System.Collections;
+using static System.Net.Mime.MediaTypeNames;
+using System.Collections.Concurrent;
+using System.Text.RegularExpressions;
 
 namespace Session2_LINQ
 {
@@ -271,6 +274,45 @@ namespace Session2_LINQ
             }
             //it will print null i guess
             Console.WriteLine("//////");
+            #endregion
+
+            #region LINQ – Grouping Operators
+            //1.Use group by to partition a list of numbers by their remainder when divided by 5
+            List<int> numbers = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+            var resg01 = numbers.GroupBy(n => n % 5);
+            foreach(var item in resg01)
+            {
+                Console.WriteLine($"Numbers with a remainder of {item.Key} when divided by 5:");
+                foreach(var num in item)
+                {
+                    Console.WriteLine(num);
+                }
+            }
+            Console.WriteLine("//////");
+
+            //2.Uses group by to partition a list of words by their first letter. Use dictionary_english.txt for Input
+            //var resg02 = stra.GroupBy(s => s[0]);
+            //foreach(var item in resg02)
+            //{
+            //    Console.WriteLine(item.Key);
+            //    foreach(var chr in item)
+            //    {
+            //        Console.WriteLine(chr);
+            //    }
+            //}
+            //Console.WriteLine("//////");
+
+            //3.Use Group By with a custom comparer that matches words that are consists of the same Characters Together
+            string[] Arr = { "from", "salt", "earn", "last", "near", "form" };
+            var resg03 = Arr.GroupBy(s => new string(s.OrderBy(c => c).ToArray()));
+            foreach (var item in resg03)
+            {
+                foreach(var str in item)
+                {
+                    Console.WriteLine(str);
+                }
+                Console.WriteLine("....");
+            }
             #endregion
         }
     }
