@@ -5,6 +5,9 @@ using System.Runtime.Intrinsics.X86;
 using System.Threading;
 using System.Diagnostics.Metrics;
 using System.Xml;
+using System.ComponentModel;
+using System.Data.SqlTypes;
+using System.Collections;
 
 namespace Session2_LINQ
 {
@@ -236,6 +239,38 @@ namespace Session2_LINQ
             }
             Console.WriteLine("//////");
 
+            #endregion
+
+            #region LINQ - Quantifiers
+            //1.Determine if any of the words in dictionary_english.txt(Read dictionary_english.txt into Array of String First) contain the substring 'ei'.
+            var resq01 = stra.Any(s => s.Contains("ei"));
+            Console.WriteLine(resq01);
+            Console.WriteLine("//////");
+
+            //2.Return a grouped a list of products only for categories that have at least one product that is out of stock.
+            var resq02 = ListGenerator.ProductList.Where(p => ListGenerator.ProductList.Any(pp => pp.Category == p.Category && pp.UnitsInStock == 0)).GroupBy(p => p.Category);
+
+            foreach (var item01 in resq02)
+            {
+                foreach (var item02 in item01)
+                {
+                    Console.WriteLine(item02);
+                }
+            }
+            Console.WriteLine("//////");
+
+            //3.Return a grouped a list of products only for categories that have all of their products in stock.
+            var resq03 = ListGenerator.ProductList.Where(p => ListGenerator.ProductList.All(pp => pp.Category == p.Category && pp.UnitsInStock > 0)).GroupBy(p => p.Category);
+
+            foreach (var item01 in resq03)
+            {
+                foreach (var item02 in item01)
+                {
+                    Console.WriteLine(item02);
+                }
+            }
+            //it will print null i guess
+            Console.WriteLine("//////");
             #endregion
         }
     }
