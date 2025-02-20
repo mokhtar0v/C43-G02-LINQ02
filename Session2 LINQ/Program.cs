@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.Intrinsics.X86;
+using System.Threading;
+using System.Diagnostics.Metrics;
 
 namespace Session2_LINQ
 {
@@ -124,6 +126,73 @@ namespace Session2_LINQ
                 Console.WriteLine(item);
             }
             Console.WriteLine("//////");
+            #endregion
+
+            #region LINQ - Ordering Operators
+            //1. Sort a list of products by name
+            var reso01 = ListGenerator.ProductList.OrderBy(p => p.ProductName);
+            foreach(var item in reso01)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //2. Uses a custom comparer to do a case-insensitive sort of the words in an array.
+            string[] ArrO = { "aPPLE", "AbAcUs", "bRaNcH", "BlUeBeRrY", "ClOvEr", "cHeRry" };
+            var reso02 = ArrO.OrderBy(w => w, StringComparer.OrdinalIgnoreCase);
+            foreach(var item in reso02)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //3. Sort a list of products by units in stock from highest to lowest.
+            var reso03 = ListGenerator.ProductList.OrderByDescending(p => p.UnitsInStock);
+            foreach(var item in reso03)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //4. Sort a list of digits, first by length of their name, and then alphabetically by the name itself.
+            string[] ArrO02 = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
+            var reso04 = ArrO02.OrderBy(p => p.Length).ThenBy(p => p);
+            foreach(var item in reso04)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //5. Sort first by-word length and then by a case-insensitive sort of the words in an array.
+            var reso05 = ArrO.OrderBy(w => w.Length).ThenBy(w => w, StringComparer.OrdinalIgnoreCase);
+            foreach(var item in reso05)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //6. Sort a list of products, first by category, and then by unit price, from highest to lowest.
+            var reso06 = ListGenerator.ProductList.OrderBy(p => p.Category).ThenBy(p => p.UnitPrice);
+            foreach(var item in reso06)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //7.Sort first by-word length and then by a case -insensitive descending sort of the words in an array.
+            var reso07 = ArrO.OrderBy(w => w.Length).ThenByDescending(w => w, StringComparer.OrdinalIgnoreCase);
+            foreach(var item in reso07)
+            {
+                Console.WriteLine(item);
+            }
+            Console.WriteLine("//////");
+
+            //8.Create a list of all digits in the array whose second letter is 'i' that is reversed from the order in the original array.
+            var reso08 = ArrO02.Where(a => a[1] == 'i').Order();
+            foreach(var item in reso08)
+            {
+                Console.WriteLine(item);
+            }
             #endregion
         }
     }
